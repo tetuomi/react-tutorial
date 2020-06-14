@@ -2,50 +2,59 @@ import React from 'react';
 import TodoList from './TodoList';
 import './css/App.css'
 import Form from './Form'
+import {firestore} from './firebase/firebase'
 
 
 class App extends React.Component {
     constructor(props) {
         super(props)
-        const todos = [
-            {
-                id: 1,
-                title: "Hello, React!",
-                desc: "React始めました",
-                done: false
-            },
-            {
-                id: 2,
-                title: "Hello, Redux!",
-                desc: "Reduxも始めました",
-                done: false
-            },
-        ]
         this.state = {
-            todos: todos,
-            countTodo: todos.length + 1,
+            todos: [],
+            count: null
         }
+    }
+    componentDidMount() {
+        console.log("Yeah");
+        this.getTodosData();
     }
     handleSubmit(e) {
         e.preventDefault()
         const title = e.target.title.value;
         const desc = e.target.desc.value;
-        const todos = this.state.todos.slice();
-        const countTodo = this.state.countTodo;
+        const count = this.state.count;
 
-        todos.push({
-            id: countTodo,
+        firestore.collection('todos').doc(this.state.count.toString()).set({
+            id: count,
             title: title,
             desc: desc,
-            done: false,
+            done: false
+        }).then(() => {
+            this.getTodosData();
         });
-        console.log(todos);
 
-        this.setState({ todos: todos })
-        this.setState({ countTodo: countTodo + 1 })
-
-        e.target.title.value = '';
-        e.target.desc.value = '';
+        e.target.title.value = 'たいてゅる';
+        e.target.desc.value = 'せえつめい';
+    }
+    getTodosData() {
+        firestore.collection('todos')
+            .orderBy('id')
+            .get()
+            .then(snapShot => {
+                let todos = [];
+                snapShot.forEach(doc => {
+                    console.log(doc.data());
+                    todos.push({
+                        id: doc.data().id,
+                        title: doc.data().title,
+                        desc: doc.data().desc,
+                        done: doc.data().done
+                    });
+                });
+                this.setState({
+                    todos: todos,
+                    count: todos.length + 1
+                });
+            });
     }
     render() {
         return (

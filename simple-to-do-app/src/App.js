@@ -59,7 +59,7 @@ class App extends React.Component {
     render() {
         return (
             <div className="app">
-                <h1>todoアプリを作ってみた</h1>
+                <h1>{this.props.user}のToDoリスト</h1>
                 <Form handleSubmit={this.handleSubmit.bind(this)} />
                 <TodoList
                     todos={this.state.todos}
